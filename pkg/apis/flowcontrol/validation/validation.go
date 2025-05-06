@@ -386,7 +386,8 @@ func ValidateIfMandatoryPriorityLevelConfigurationObject(pl *flowcontrol.Priorit
 	// sides of this comparison are intended to ultimately
 	// come from the same code.
 	if !apiequality.Semantic.DeepEqual(pl.Spec, mand.Spec) {
-		allErrs = append(allErrs, field.Invalid(fldPath, pl.Spec, fmt.Sprintf("spec of '%s' must equal the fixed value", pl.Name)))
+		escapedName := strings.ReplaceAll(pl.Name, "'", "\\'")
+		allErrs = append(allErrs, field.Invalid(fldPath, pl.Spec, fmt.Sprintf("spec of '%s' must equal the fixed value", escapedName)))
 	}
 	return allErrs
 }
