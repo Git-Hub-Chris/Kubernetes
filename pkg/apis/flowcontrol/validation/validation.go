@@ -18,6 +18,7 @@ package validation
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	flowcontrolv1beta1 "k8s.io/api/flowcontrol/v1beta1"
@@ -89,7 +90,7 @@ func ValidateFlowSchema(fs *flowcontrol.FlowSchema) field.ErrorList {
 		// sides of this comparison are intended to ultimately
 		// come from the same code.
 		if !apiequality.Semantic.DeepEqual(fs.Spec, mand.Spec) {
-			allErrs = append(allErrs, field.Invalid(specPath, fs.Spec, fmt.Sprintf("spec of '%s' must equal the fixed value", fs.Name)))
+			allErrs = append(allErrs, field.Invalid(specPath, fs.Spec, fmt.Sprintf("spec of %s must equal the fixed value", strconv.Quote(fs.Name))))
 		}
 	}
 	allErrs = append(allErrs, ValidateFlowSchemaStatus(&fs.Status, field.NewPath("status"))...)
