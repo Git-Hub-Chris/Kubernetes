@@ -93,7 +93,7 @@ func validateResources(resources []string, fldPath *field.Path) field.ErrorList 
 		}
 		res, sub := parts[0], parts[1]
 		if _, ok := resourcesWithWildcardSubresoures[res]; ok {
-			allErrors = append(allErrors, field.Invalid(fldPath.Index(i), resSub, fmt.Sprintf("if '%s/*' is present, must not specify %s", res, resSub)))
+			allErrors = append(allErrors, field.Invalid(fldPath.Index(i), resSub, fmt.Sprintf("if %s/* is present, must not specify %s", strconv.Quote(res), resSub)))
 		}
 		if _, ok := subResourcesWithWildcardResource[sub]; ok {
 			allErrors = append(allErrors, field.Invalid(fldPath.Index(i), resSub, fmt.Sprintf("if '*/%s' is present, must not specify %s", strconv.Quote(sub), resSub)))
