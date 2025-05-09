@@ -72,13 +72,13 @@ func (f *fakeService) Run(ctx context.Context) error {
 		panic(err)
 	}
 
-	serverPort, err := strconv.Atoi(serverURL.Port())
+	parsedPort, err := strconv.ParseInt(serverURL.Port(), 10, 32)
 	if err != nil {
 		// This should never occur
 		panic(err)
 	}
 
-	port := int32(serverPort)
+	port := int32(parsedPort)
 
 	// Install service into the cluster
 	service, err := f.client.CoreV1().Services("default").Apply(
