@@ -474,10 +474,11 @@ func (o *ExposeServiceOptions) createService() (*corev1.Service, error) {
 		portStringSlice := strings.Split(portString, ",")
 		servicePortName := o.PortName
 		for i, stillPortString := range portStringSlice {
-			port, err := strconv.Atoi(stillPortString)
+			parsedPort, err := strconv.ParseInt(stillPortString, 10, 32)
 			if err != nil {
 				return nil, err
 			}
+			port := int32(parsedPort)
 			name := servicePortName
 			// If we are going to assign multiple ports to a service, we need to
 			// generate a different name for each one.
