@@ -813,6 +813,12 @@ func getAllSnapshots(s *service, req *csi.ListSnapshotsRequest) (*csi.ListSnapsh
 				"startingToken=%s: %v",
 				v, err)
 		}
+		if i > math.MaxInt32 {
+			return nil, status.Errorf(
+				codes.Aborted,
+				"startingToken=%s exceeds maximum value for int32",
+				v)
+		}
 		startingToken = int32(i)
 	}
 
