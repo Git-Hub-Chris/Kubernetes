@@ -23,6 +23,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"math"
 
 	apimachineryversion "k8s.io/apimachinery/pkg/version"
 )
@@ -478,6 +479,10 @@ func (v *Version) Info() *apimachineryversion.Info {
 
 func itoa(i uint) string {
 	if i == 0 {
+		return ""
+	}
+	// Ensure the value fits within the range of int
+	if i > uint(math.MaxInt) {
 		return ""
 	}
 	return strconv.Itoa(int(i))
