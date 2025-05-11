@@ -18,6 +18,7 @@ package versioned
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 
@@ -146,6 +147,10 @@ func generateService(genericParams map[string]interface{}) (runtime.Object, erro
 			port, err := strconv.Atoi(stillPortString)
 			if err != nil {
 				return nil, err
+			}
+			// Ensure the port value fits within the range of int32
+			if port < math.MinInt32 || port > math.MaxInt32 {
+				return nil, fmt.Errorf("port value %d is out of range for int32", port)
 			}
 			name := servicePortName
 			// If we are going to assign multiple ports to a service, we need to
