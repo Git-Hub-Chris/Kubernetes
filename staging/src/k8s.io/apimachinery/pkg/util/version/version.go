@@ -481,10 +481,6 @@ func itoa(i uint) string {
 	if i == 0 {
 		return ""
 	}
-	// Ensure the value fits within the range of int
-	maxInt := uint(1<<(strconv.IntSize-1) - 1) // Dynamically calculate the maximum value of int
-	if i > maxInt {
-		return ""
-	}
-	return strconv.Itoa(int(i))
+	// Directly convert the uint value to a string
+	return strconv.FormatUint(uint64(i), 10)
 }
