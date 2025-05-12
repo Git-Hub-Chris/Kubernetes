@@ -482,7 +482,8 @@ func itoa(i uint) string {
 		return ""
 	}
 	// Ensure the value fits within the range of int
-	if i > uint(math.MaxInt) {
+	maxInt := uint(1<<(strconv.IntSize-1) - 1) // Dynamically calculate the maximum value of int
+	if i > maxInt {
 		return ""
 	}
 	return strconv.Itoa(int(i))
