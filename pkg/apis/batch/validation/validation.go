@@ -988,6 +988,9 @@ func parseIndexInterval(intervalStr string, completions int32) (int32, int32, er
 	if err != nil {
 		return 0, 0, fmt.Errorf("cannot convert string to integer for index: %q", limitsStr[0])
 	}
+	if x < math.MinInt32 || x > math.MaxInt32 {
+		return 0, 0, fmt.Errorf("index out of int32 range: %q", limitsStr[0])
+	}
 	if x >= int(completions) {
 		return 0, 0, fmt.Errorf("too large index: %q", limitsStr[0])
 	}
@@ -995,6 +998,9 @@ func parseIndexInterval(intervalStr string, completions int32) (int32, int32, er
 		y, err := strconv.Atoi(limitsStr[1])
 		if err != nil {
 			return 0, 0, fmt.Errorf("cannot convert string to integer for index: %q", limitsStr[1])
+		}
+		if y < math.MinInt32 || y > math.MaxInt32 {
+			return 0, 0, fmt.Errorf("index out of int32 range: %q", limitsStr[1])
 		}
 		if y >= int(completions) {
 			return 0, 0, fmt.Errorf("too large index: %q", limitsStr[1])
