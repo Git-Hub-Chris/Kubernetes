@@ -984,24 +984,20 @@ func parseIndexInterval(intervalStr string, completions int32) (int32, int32, er
 	if len(limitsStr) > 2 {
 		return 0, 0, fmt.Errorf("the fragment %q violates the requirement that an index interval can have at most two parts separated by '-'", intervalStr)
 	}
-	x, err := strconv.Atoi(limitsStr[0])
+	x64, err := strconv.ParseInt(limitsStr[0], 10, 32)
 	if err != nil {
-		return 0, 0, fmt.Errorf("cannot convert string to integer for index: %q", limitsStr[0])
+		return 0, 0, fmt.Errorf("cannot parse string to int32 for index: %q", limitsStr[0])
 	}
-	if x < math.MinInt32 || x > math.MaxInt32 {
-		return 0, 0, fmt.Errorf("index out of int32 range: %q", limitsStr[0])
-	}
+	x := int32(x64)
 	if x >= int(completions) {
 		return 0, 0, fmt.Errorf("too large index: %q", limitsStr[0])
 	}
 	if len(limitsStr) > 1 {
-		y, err := strconv.Atoi(limitsStr[1])
+		y64, err := strconv.ParseInt(limitsStr[1], 10, 32)
 		if err != nil {
-			return 0, 0, fmt.Errorf("cannot convert string to integer for index: %q", limitsStr[1])
+			return 0, 0, fmt.Errorf("cannot parse string to int32 for index: %q", limitsStr[1])
 		}
-		if y < math.MinInt32 || y > math.MaxInt32 {
-			return 0, 0, fmt.Errorf("index out of int32 range: %q", limitsStr[1])
-		}
+		y := int32(y64)
 		if y >= int(completions) {
 			return 0, 0, fmt.Errorf("too large index: %q", limitsStr[1])
 		}
