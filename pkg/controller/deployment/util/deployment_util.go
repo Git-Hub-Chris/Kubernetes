@@ -902,6 +902,14 @@ func ResolveFenceposts(maxSurge, maxUnavailable *intstrutil.IntOrString, desired
 		unavailable = 1
 	}
 
+	// Ensure surge and unavailable are within the bounds of int32
+	if surge > math.MaxInt32 || surge < math.MinInt32 {
+		return 0, 0, fmt.Errorf("surge value %d is out of int32 bounds", surge)
+	}
+	if unavailable > math.MaxInt32 || unavailable < math.MinInt32 {
+		return 0, 0, fmt.Errorf("unavailable value %d is out of int32 bounds", unavailable)
+	}
+
 	return int32(surge), int32(unavailable), nil
 }
 
