@@ -529,7 +529,13 @@ func (o *CopyOptions) untarAll(ns, pod string, prefix string, src remotePath, de
 		// with cleaning remote paths
 		destFileName := dest.Join(newRemotePath(header.Name[len(prefix):]))
 
-		if !isRelative(dest, destFileName) {
+		// Validate that destFileName is within the intended destination directory
+		absDest, err := filepath.Abs(dest.String())
+		if err != nil {
+			return fmt.Errorf("failed to resolve destination path: %v", err)
+		}
+		absDestFileName, err := filepath.Abs(destFileName.String())
+		if err != nil || !strings.HasPrefix(absDestFileName, absDest) {
 			fmt.Fprintf(o.IOStreams.ErrOut, "warning: file %q is outside target destination, skipping\n", destFileName)
 			continue
 		}
