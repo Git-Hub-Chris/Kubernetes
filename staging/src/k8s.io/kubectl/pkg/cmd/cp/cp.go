@@ -518,8 +518,9 @@ func (o *CopyOptions) untarAll(ns, pod string, prefix string, src remotePath, de
 		// if the prefix is missing it means the tar was tempered with.
 		// For the case where prefix is empty we need to ensure that the path
 		// is not absolute, which also indicates the tar file was tempered with.
-		if !strings.HasPrefix(header.Name, prefix) {
-			return fmt.Errorf("tar contents corrupted")
+		cleanedName := path.Clean(header.Name)
+		if strings.HasPrefix(cleanedName, "/") || strings.Contains(cleanedName, "..") {
+			return fmt.Errorf("tar contents corrupted: invalid file path %q", header.Name)
 		}
 
 		// basic file information
@@ -527,7 +528,7 @@ func (o *CopyOptions) untarAll(ns, pod string, prefix string, src remotePath, de
 		// header.Name is a name of the REMOTE file, so we need to create
 		// a remotePath so that it goes through appropriate processing related
 		// with cleaning remote paths
-		destFileName := dest.Join(newRemotePath(header.Name[len(prefix):]))
+		destFileName := dest.Join(newRemotePath(cleanedName[len(prefix):]))
 
 		// Validate that destFileName is within the intended destination directory
 		absDest, err := filepath.Abs(dest.String())
