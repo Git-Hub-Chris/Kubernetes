@@ -171,7 +171,19 @@ func (d *CachedDiscoveryClient) getCachedFile(filename string) ([]byte, error) {
 }
 
 func (d *CachedDiscoveryClient) writeCachedFile(filename string, obj runtime.Object) error {
-	if err := os.MkdirAll(filepath.Dir(filename), 0750); err != nil {
+	// Sanitize and validate the filename
+	filename = filepath.Clean(filename)
+	if filepath.IsAbs(filename) || strings.Contains(filename, "..") {
+		return errors.New("invalid filename: must be a relative path without directory traversal")
+	}
+
+	// Ensure the filename is within the cache directory
+	absPath, err := filepath.Abs(filepath.Join(d.cacheDirectory, filename))
+	if err != nil || !strings.HasPrefix(absPath, filepath.Clean(d.cacheDirectory)) {
+		return errors.New("invalid filename: must be within the cache directory")
+	}
+
+	if err := os.MkdirAll(filepath.Dir(absPath), 0750); err != nil {
 		return err
 	}
 
@@ -180,7 +192,7 @@ func (d *CachedDiscoveryClient) writeCachedFile(filename string, obj runtime.Obj
 		return err
 	}
 
-	f, err := os.CreateTemp(filepath.Dir(filename), filepath.Base(filename)+".")
+	f, err := os.CreateTemp(filepath.Dir(absPath), filepath.Base(absPath)+".")
 	if err != nil {
 		return err
 	}
@@ -204,9 +216,9 @@ func (d *CachedDiscoveryClient) writeCachedFile(filename string, obj runtime.Obj
 	// atomic rename
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
-	err = os.Rename(name, filename)
+	err = os.Rename(name, absPath)
 	if err == nil {
-		d.ourFiles[filename] = struct{}{}
+		d.ourFiles[absPath] = struct{}{}
 	}
 	return err
 }
