@@ -179,7 +179,11 @@ func (d *CachedDiscoveryClient) writeCachedFile(filename string, obj runtime.Obj
 
 	// Ensure the filename is within the cache directory
 	absPath, err := filepath.Abs(filepath.Join(d.cacheDirectory, filename))
-	if err != nil || !strings.HasPrefix(absPath, filepath.Clean(d.cacheDirectory)) {
+	if err != nil {
+		return errors.New("invalid filename: failed to resolve absolute path")
+	}
+	relPath, err := filepath.Rel(filepath.Clean(d.cacheDirectory), absPath)
+	if err != nil || strings.HasPrefix(relPath, "..") {
 		return errors.New("invalid filename: must be within the cache directory")
 	}
 
