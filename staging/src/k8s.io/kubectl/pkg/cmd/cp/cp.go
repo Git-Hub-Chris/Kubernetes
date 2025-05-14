@@ -545,7 +545,12 @@ func (o *CopyOptions) untarAll(ns, pod string, prefix string, src remotePath, de
 			return err
 		}
 		if header.FileInfo().IsDir() {
-			if err := os.MkdirAll(destFileName.String(), 0755); err != nil {
+			// Validate and sanitize destFileName before using it
+			sanitizedDestFileName := filepath.Clean(destFileName.String())
+			if !strings.HasPrefix(sanitizedDestFileName, absDest) {
+				return fmt.Errorf("invalid file path: %q is outside the target destination", sanitizedDestFileName)
+			}
+			if err := os.MkdirAll(sanitizedDestFileName, 0755); err != nil {
 				return err
 			}
 			continue
@@ -562,7 +567,12 @@ func (o *CopyOptions) untarAll(ns, pod string, prefix string, src remotePath, de
 			fmt.Fprintf(o.IOStreams.ErrOut, "warning: skipping symlink: %q -> %q\n", destFileName, header.Linkname)
 			continue
 		}
-		outFile, err := os.Create(destFileName.String())
+		// Validate and sanitize destFileName before creating the file
+		sanitizedDestFileName := filepath.Clean(destFileName.String())
+		if !strings.HasPrefix(sanitizedDestFileName, absDest) {
+			return fmt.Errorf("invalid file path: %q is outside the target destination", sanitizedDestFileName)
+		}
+		outFile, err := os.Create(sanitizedDestFileName)
 		if err != nil {
 			return err
 		}
