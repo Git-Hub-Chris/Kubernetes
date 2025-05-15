@@ -41,6 +41,7 @@ import (
 )
 
 
+
 // NodeAuthorizer authorizes requests from kubelets, with the following logic:
 //  1. If a request is not from a node (NodeIdentity() returns isNode=false), reject
 //  2. If a specific node cannot be identified (NodeIdentity() returns nodeName=""), reject
@@ -344,7 +345,7 @@ func (r *NodeAuthorizer) authorizeResourceSlice(nodeName string, attrs authorize
 				}
 			}
 			// deny otherwise
-			klog.V(2).Infof("NODE DENY: '%s' %#v", nodeName, attrs)
+			klog.V(2).Infof("NODE DENY: '%s' %s", nodeName, sanitizeAttributes(attrs))
 			return authorizer.DecisionNoOpinion, "can only list/watch/deletecollection resourceslices with nodeName field selector", nil
 		} else {
 			// Allow broad list/watch access if AuthorizeNodeWithSelectors is not enabled.
