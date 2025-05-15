@@ -40,6 +40,7 @@ import (
 	"k8s.io/kubernetes/third_party/forked/gonum/graph/traverse"
 )
 
+
 // NodeAuthorizer authorizes requests from kubelets, with the following logic:
 //  1. If a request is not from a node (NodeIdentity() returns isNode=false), reject
 //  2. If a specific node cannot be identified (NodeIdentity() returns nodeName=""), reject
@@ -374,10 +375,10 @@ func (r *NodeAuthorizer) authorizeNode(nodeName string, attrs authorizer.Attribu
 			case nodeName:
 				return authorizer.DecisionAllow, "", nil
 			case "":
-				klog.V(2).Infof("NODE DENY: '%s' %#v", nodeName, attrs)
+				klog.V(2).Infof("NODE DENY: '%s' %s", nodeName, sanitizeAttributes(attrs))
 				return authorizer.DecisionNoOpinion, fmt.Sprintf("node '%s' cannot read all nodes, only its own Node object", nodeName), nil
 			default:
-				klog.V(2).Infof("NODE DENY: '%s' %#v", nodeName, attrs)
+				klog.V(2).Infof("NODE DENY: '%s' %s", nodeName, sanitizeAttributes(attrs))
 				return authorizer.DecisionNoOpinion, fmt.Sprintf("node '%s' cannot read '%s', only its own Node object", nodeName, attrs.GetName()), nil
 			}
 		}
@@ -389,7 +390,7 @@ func (r *NodeAuthorizer) authorizeNode(nodeName string, attrs authorizer.Attribu
 		}
 	}
 
-	klog.V(2).Infof("NODE DENY: '%s' %#v", nodeName, attrs)
+	klog.V(2).Infof("NODE DENY: '%s' %s", nodeName, sanitizeAttributes(attrs))
 	return authorizer.DecisionNoOpinion, "", nil
 }
 
