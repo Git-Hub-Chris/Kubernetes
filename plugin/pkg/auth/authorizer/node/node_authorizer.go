@@ -295,12 +295,14 @@ func (r *NodeAuthorizer) authorizeCSINode(nodeName string, attrs authorizer.Attr
 	case "get", "create", "update", "patch", "delete":
 		//ok
 	default:
-		klog.V(2).Infof("NODE DENY: '%s' %#v", nodeName, attrs)
+		klog.V(2).Infof("NODE DENY: '%s' (verb=%q, resource=%q, subresource=%q, name=%q, namespace=%q)", 
+			nodeName, attrs.GetVerb(), attrs.GetResource(), attrs.GetSubresource(), attrs.GetName(), attrs.GetNamespace())
 		return authorizer.DecisionNoOpinion, "can only get, create, update, patch, or delete a CSINode", nil
 	}
 
 	if len(attrs.GetSubresource()) > 0 {
-		klog.V(2).Infof("NODE DENY: '%s' %#v", nodeName, attrs)
+		klog.V(2).Infof("NODE DENY: '%s' (verb=%q, resource=%q, subresource=%q, name=%q, namespace=%q)", 
+			nodeName, attrs.GetVerb(), attrs.GetResource(), attrs.GetSubresource(), attrs.GetName(), attrs.GetNamespace())
 		return authorizer.DecisionNoOpinion, "cannot authorize CSINode subresources", nil
 	}
 
@@ -308,7 +310,8 @@ func (r *NodeAuthorizer) authorizeCSINode(nodeName string, attrs authorizer.Attr
 	// note we skip this check for create, since the authorizer doesn't know the name on create
 	// the noderestriction admission plugin is capable of performing this check at create time
 	if verb != "create" && attrs.GetName() != nodeName {
-		klog.V(2).Infof("NODE DENY: '%s' %#v", nodeName, attrs)
+		klog.V(2).Infof("NODE DENY: '%s' (verb=%q, resource=%q, subresource=%q, name=%q, namespace=%q)", 
+			nodeName, attrs.GetVerb(), attrs.GetResource(), attrs.GetSubresource(), attrs.GetName(), attrs.GetNamespace())
 		return authorizer.DecisionNoOpinion, "can only access CSINode with the same name as the requesting node", nil
 	}
 
