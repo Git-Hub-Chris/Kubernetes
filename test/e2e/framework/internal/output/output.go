@@ -167,7 +167,7 @@ var klogPrefix = regexp.MustCompile(`(?m)^[IEF][[:digit:]]{4} [[:digit:]]{2}:[[:
 // created by testing.(*T).Run
 //
 //	/nvme/gopath/go/src/testing/testing.go:916 +0x35a
-var testFailureOutput = regexp.MustCompile(`(?m)^k8s.io/kubernetes/test/e2e/framework/internal/output\.TestGinkgoOutput\(.*\n\t.*(\n.*\n\t.*)*`)
+var testFailureOutput = regexp.MustCompile(`(?m)^k8s\.io/kubernetes/test/e2e/framework/internal/output\.TestGinkgoOutput\(.*\n\t.*(\n.*\n\t.*)*`)
 
 // normalizeLocation removes path prefix and function parameters and certain stack entries
 // that we don't care about.
