@@ -41,6 +41,9 @@ func LabelSelectorAsSelector(ps *LabelSelector) (labels.Selector, error) {
 		return labels.Everything(), nil
 	}
 	const maxRequirements = 1 << 30 // Maximum safe value for the sum of MatchLabels and MatchExpressions
+	if len(ps.MatchLabels) > maxRequirements || len(ps.MatchExpressions) > maxRequirements {
+		return nil, fmt.Errorf("too many label selector requirements: MatchLabels or MatchExpressions exceeds the limit of %d", maxRequirements)
+	}
 	if len(ps.MatchLabels)+len(ps.MatchExpressions) > maxRequirements {
 		return nil, fmt.Errorf("too many label selector requirements: %d", len(ps.MatchLabels)+len(ps.MatchExpressions))
 	}
