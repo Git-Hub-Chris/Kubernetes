@@ -572,7 +572,7 @@ func rsaKeySizeFromAlgorithmType(keyType kubeadmapi.EncryptionAlgorithmType) int
 	case kubeadmapi.EncryptionAlgorithmRSA4096:
 		return 4096
 	default:
-		return 0
+		return 2048
 	}
 }
 
