@@ -34,6 +34,8 @@ import (
 	"k8s.io/klog/v2"
 )
 
+const MaxDataSize = 64 * 1024 * 1024 // 64 MB
+
 // commonSize is the length of various security sensitive byte slices such as encryption keys.
 // Do not change this value.  It would be a backward incompatible change.
 const commonSize = 32
@@ -194,6 +196,10 @@ func (t *gcm) TransformFromStorage(ctx context.Context, data []byte, dataCtx val
 
 func (t *gcm) TransformToStorage(ctx context.Context, data []byte, dataCtx value.Context) ([]byte, error) {
 	nonceSize := t.aead.NonceSize()
+	// Validate size to prevent integer overflow
+	if len(data) > MaxDataSize {
+		return nil, fmt.Errorf("data size exceeds maximum allowed size of %d bytes", MaxDataSize)
+	}
 	result := make([]byte, nonceSize+t.aead.Overhead()+len(data))
 
 	if err := t.nonceFunc(result[:nonceSize]); err != nil {
