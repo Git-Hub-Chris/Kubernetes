@@ -179,6 +179,12 @@ func (t *prefixTransformers) TransformToStorage(ctx context.Context, data []byte
 		logTransformErr(ctx, err, "failed to encrypt data")
 		return nil, err
 	}
+	// Validate the size of the result to prevent overflow during allocation
+	const maxAllowedSize = 64 * 1024 * 1024 // 64 MB
+	if len(result) > maxAllowedSize {
+		return nil, fmt.Errorf("data size exceeds maximum allowed limit of %d bytes", maxAllowedSize)
+	}
+
 	prefixedData := make([]byte, len(transformer.Prefix), len(result)+len(transformer.Prefix))
 	copy(prefixedData, transformer.Prefix)
 	prefixedData = append(prefixedData, result...)

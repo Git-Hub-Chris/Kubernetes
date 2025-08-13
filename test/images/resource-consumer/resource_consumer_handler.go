@@ -18,6 +18,7 @@ package main
 
 import (
 	"fmt"
+	"html"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -174,7 +175,7 @@ func (handler *ResourceConsumerHandler) handleBumpMetric(w http.ResponseWriter, 
 
 	go handler.bumpMetric(metric, delta, time.Duration(durationSec)*time.Second)
 	fmt.Fprintln(w, common.BumpMetricAddress[1:])
-	fmt.Fprintln(w, metric, common.MetricNameQuery)
-	fmt.Fprintln(w, delta, common.DeltaQuery)
-	fmt.Fprintln(w, durationSec, common.DurationSecQuery)
+	fmt.Fprintln(w, html.EscapeString(metric), common.MetricNameQuery)
+	fmt.Fprintln(w, html.EscapeString(fmt.Sprintf("%f", delta)), common.DeltaQuery)
+	fmt.Fprintln(w, html.EscapeString(fmt.Sprintf("%d", durationSec)), common.DurationSecQuery)
 }

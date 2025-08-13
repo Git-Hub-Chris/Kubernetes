@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"html"
 	"runtime"
 	"sync"
 	"time"
@@ -208,7 +209,8 @@ func (tw *baseTimeoutWriter) Write(p []byte) (int, error) {
 		copyHeaders(tw.w.Header(), tw.handlerHeaders)
 		tw.wroteHeader = true
 	}
-	return tw.w.Write(p)
+	escapedData := []byte(html.EscapeString(string(p)))
+	return tw.w.Write(escapedData)
 }
 
 func (tw *baseTimeoutWriter) Flush() {
