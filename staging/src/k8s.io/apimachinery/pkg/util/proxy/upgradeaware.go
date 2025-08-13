@@ -449,12 +449,15 @@ func (h *UpgradeAwareHandler) tryUpgrade(w http.ResponseWriter, req *http.Reques
 	case <-writerComplete:
 	case <-readerComplete:
 	}
-	// Filter or mask sensitive headers before logging
+	// Log only safe headers to avoid exposing sensitive information
 	safeHeaders := http.Header{}
+	allowedHeaders := map[string]bool{
+		"Content-Type": true,
+		"User-Agent":   true,
+		"Accept":       true,
+	}
 	for key, values := range clone.Header {
-		if strings.EqualFold(key, "Authorization") || strings.EqualFold(key, "Cookie") {
-			safeHeaders[key] = []string{"***"} // Mask sensitive headers
-		} else {
+		if allowedHeaders[key] {
 			safeHeaders[key] = values
 		}
 	}
