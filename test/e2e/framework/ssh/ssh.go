@@ -298,7 +298,20 @@ func runSSHCommandViaBastion(ctx context.Context, cmd, user, bastion, host strin
 	config := &ssh.ClientConfig{
 		User:            user,
 		Auth:            []ssh.AuthMethod{ssh.PublicKeys(signer)},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
+			allowedKeyBytes, err := os.ReadFile("allowed_hostkey.pub")
+			if err != nil {
+				return fmt.Errorf("failed to read allowed host key: %w", err)
+			}
+			allowedKey, err := ssh.ParsePublicKey(allowedKeyBytes)
+			if err != nil {
+				return fmt.Errorf("failed to parse allowed host key: %w", err)
+			}
+			if ssh.KeysEqual(allowedKey, key) {
+				return nil
+			}
+			return fmt.Errorf("host key verification failed for %s", hostname)
+		},
 		Timeout:         150 * time.Second,
 	}
 	bastionClient, err := ssh.Dial("tcp", bastion, config)

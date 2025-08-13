@@ -168,12 +168,12 @@ func (r *NodeAuthorizer) authorizeStatusUpdate(nodeName string, startingType ver
 	case "update", "patch":
 		// ok
 	default:
-		klog.V(2).Infof("NODE DENY: '%s' %#v", nodeName, attrs)
+		klog.V(2).Infof("NODE DENY: '%s' %s", nodeName, redactAttributes(attrs))
 		return authorizer.DecisionNoOpinion, "can only get/update/patch this type", nil
 	}
 
 	if attrs.GetSubresource() != "status" {
-		klog.V(2).Infof("NODE DENY: '%s' %#v", nodeName, attrs)
+		klog.V(2).Infof("NODE DENY: '%s' %s", nodeName, redactAttributes(attrs))
 		return authorizer.DecisionNoOpinion, "can only update status subresource", nil
 	}
 
@@ -200,12 +200,12 @@ func (r *NodeAuthorizer) authorizeReadNamespacedObject(nodeName string, starting
 	case "get", "list", "watch":
 		//ok
 	default:
-		klog.V(2).Infof("NODE DENY: '%s' %#v", nodeName, attrs)
+		klog.V(2).Infof("NODE DENY: '%s' %s", nodeName, redactAttributes(attrs))
 		return authorizer.DecisionNoOpinion, "can only read resources of this type", nil
 	}
 
 	if len(attrs.GetSubresource()) > 0 {
-		klog.V(2).Infof("NODE DENY: '%s' %#v", nodeName, attrs)
+		klog.V(2).Infof("NODE DENY: '%s' %s", nodeName, redactAttributes(attrs))
 		return authorizer.DecisionNoOpinion, "cannot read subresource", nil
 	}
 	if len(attrs.GetNamespace()) == 0 {
@@ -223,11 +223,11 @@ func (r *NodeAuthorizer) authorize(nodeName string, startingType vertexType, att
 
 	ok, err := r.hasPathFrom(nodeName, startingType, attrs.GetNamespace(), attrs.GetName())
 	if err != nil {
-		klog.V(2).InfoS("NODE DENY", "err", err)
+		klog.V(2).InfoS("NODE DENY", "err", err, "attributes", redactAttributes(attrs))
 		return authorizer.DecisionNoOpinion, fmt.Sprintf("no relationship found between node '%s' and this object", nodeName), nil
 	}
 	if !ok {
-		klog.V(2).Infof("NODE DENY: '%s' (attributes redacted)", nodeName)
+		klog.V(2).Infof("NODE DENY: '%s' %s", nodeName, redactAttributes(attrs))
 		return authorizer.DecisionNoOpinion, fmt.Sprintf("no relationship found between node '%s' and this object", nodeName), nil
 	}
 	return authorizer.DecisionAllow, "", nil
