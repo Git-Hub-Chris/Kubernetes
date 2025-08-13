@@ -98,7 +98,7 @@ func (t *TokenAuthenticator) AuthenticateToken(ctx context.Context, token string
 	secret, err := t.lister.Get(secretName)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			klog.V(3).Infof("No secret of name %s to match bootstrap bearer token", secretName)
+			klog.V(3).Info("No matching secret found for the provided bootstrap bearer token")
 			return nil, false, nil
 		}
 		return nil, false, err
