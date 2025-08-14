@@ -287,7 +287,7 @@ func (p *pluginProvider) Provide(image string) credentialprovider.DockerConfig {
 	}
 
 	if err := p.cache.Add(cachedEntry); err != nil {
-		klog.Errorf("Error adding auth entry to cache: %v", err)
+		klog.Error("Error adding auth entry to cache. Sensitive information has been omitted.")
 	}
 
 	return dockerConfig

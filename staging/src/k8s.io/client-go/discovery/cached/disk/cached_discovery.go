@@ -68,6 +68,10 @@ var _ discovery.CachedDiscoveryInterface = &CachedDiscoveryClient{}
 
 // ServerResourcesForGroupVersion returns the supported resources for a group and version.
 func (d *CachedDiscoveryClient) ServerResourcesForGroupVersion(groupVersion string) (*metav1.APIResourceList, error) {
+	// Validate groupVersion to ensure it does not contain invalid characters
+	if strings.Contains(groupVersion, "/") || strings.Contains(groupVersion, "\\") || strings.Contains(groupVersion, "..") {
+		return nil, fmt.Errorf("invalid groupVersion: %s", groupVersion)
+	}
 	filename := filepath.Join(d.cacheDirectory, groupVersion, "serverresources.json")
 	cachedBytes, err := d.getCachedFile(filename)
 	// don't fail on errors, we either don't have a file or won't be able to run the cached check. Either way we can fallback.
@@ -179,7 +183,11 @@ func (d *CachedDiscoveryClient) writeCachedFile(filename string, obj runtime.Obj
 
 	// Ensure the filename is within the cache directory
 	absPath, err := filepath.Abs(filepath.Join(d.cacheDirectory, filename))
-	if err != nil || !strings.HasPrefix(absPath, filepath.Clean(d.cacheDirectory)) {
+	if err != nil {
+		return errors.New("invalid filename: failed to resolve absolute path")
+	}
+	relPath, err := filepath.Rel(filepath.Clean(d.cacheDirectory), absPath)
+	if err != nil || strings.HasPrefix(relPath, "..") {
 		return errors.New("invalid filename: must be within the cache directory")
 	}
 
