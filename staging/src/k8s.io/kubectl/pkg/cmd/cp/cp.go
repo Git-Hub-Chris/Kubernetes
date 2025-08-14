@@ -436,7 +436,14 @@ func recursiveTar(srcDir, srcFile localPath, destDir, destFile remotePath, tw *t
 		return err
 	}
 	for _, fpath := range matchedPaths {
-		stat, err := os.Lstat(fpath)
+		absFpath, err := filepath.Abs(fpath)
+		if err != nil {
+			return err
+		}
+		if !strings.HasPrefix(absFpath, srcDir.String()) {
+			return fmt.Errorf("invalid file path: %s", fpath)
+		}
+		stat, err := os.Lstat(absFpath)
 		if err != nil {
 			return err
 		}
@@ -541,7 +548,12 @@ func (o *CopyOptions) untarAll(ns, pod string, prefix string, src remotePath, de
 			continue
 		}
 
-		if err := os.MkdirAll(destFileName.Dir().String(), 0755); err != nil {
+		// Validate and sanitize the directory path before creating it
+		sanitizedDirPath := filepath.Clean(destFileName.Dir().String())
+		if !strings.HasPrefix(sanitizedDirPath, absDest) {
+			return fmt.Errorf("invalid directory path: %q is outside the target destination", sanitizedDirPath)
+		}
+		if err := os.MkdirAll(sanitizedDirPath, 0755); err != nil {
 			return err
 		}
 		if header.FileInfo().IsDir() {

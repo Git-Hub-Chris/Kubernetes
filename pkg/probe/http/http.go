@@ -38,7 +38,7 @@ const (
 // followNonLocalRedirects configures whether the prober should follow redirects to a different hostname.
 // If disabled, redirects to other hosts will trigger a warning result.
 func New(followNonLocalRedirects bool) Prober {
-	tlsConfig := &tls.Config{InsecureSkipVerify: true}
+	tlsConfig := &tls.Config{}
 	return NewWithTLSConfig(tlsConfig, followNonLocalRedirects)
 }
 
