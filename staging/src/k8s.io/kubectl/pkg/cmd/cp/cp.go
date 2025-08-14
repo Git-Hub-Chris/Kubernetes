@@ -436,7 +436,14 @@ func recursiveTar(srcDir, srcFile localPath, destDir, destFile remotePath, tw *t
 		return err
 	}
 	for _, fpath := range matchedPaths {
-		stat, err := os.Lstat(fpath)
+		absFpath, err := filepath.Abs(fpath)
+		if err != nil {
+			return err
+		}
+		if !strings.HasPrefix(absFpath, srcDir.String()) {
+			return fmt.Errorf("invalid file path: %s", fpath)
+		}
+		stat, err := os.Lstat(absFpath)
 		if err != nil {
 			return err
 		}
