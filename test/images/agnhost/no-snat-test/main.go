@@ -18,6 +18,7 @@ package nosnat
 
 import (
 	"fmt"
+	"html"
 	"io"
 	"net/http"
 	"os"
@@ -103,7 +104,7 @@ type handler func(http.ResponseWriter, *http.Request)
 func joinErrors(errs []error, sep string) string {
 	strs := make([]string, len(errs))
 	for i, err := range errs {
-		strs[i] = err.Error()
+		strs[i] = html.EscapeString(err.Error())
 	}
 	return strings.Join(strs, sep)
 }
