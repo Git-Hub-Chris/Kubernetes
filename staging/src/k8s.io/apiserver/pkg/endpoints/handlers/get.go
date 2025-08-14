@@ -152,9 +152,11 @@ func getRequestOptions(req *http.Request, scope *RequestScope, into runtime.Obje
 
 		p := strings.Join(requestInfo.Parts[startingIndex:], "/")
 
-		// ensure non-empty subpaths correctly reflect a leading slash
-		if len(p) > 0 && !strings.HasPrefix(p, "/") {
-			p = "/" + p
+		// ensure non-empty subpaths correctly reflect a leading slash and disallow "//" or "/\"
+		if len(p) > 0 {
+			if !strings.HasPrefix(p, "/") || (len(p) > 1 && (p[1] == '/' || p[1] == '\\')) {
+				p = "/" + p
+			}
 		}
 
 		// ensure subpaths correctly reflect the presence of a trailing slash on the original request
