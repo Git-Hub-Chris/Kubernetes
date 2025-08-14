@@ -397,7 +397,14 @@ func CreateConfig(
 func CreateProxyTransport() *http.Transport {
 	var proxyDialerFn utilnet.DialFunc
 	// Proxying to pods and services is IP-based... don't expect to be able to verify the hostname
-	proxyTLSClientConfig := &tls.Config{InsecureSkipVerify: true}
+	proxyTLSClientConfig := &tls.Config{
+		InsecureSkipVerify: false,
+		VerifyPeerCertificate: func(rawCerts [][]byte, verifiedChains [][]*tls.Certificate) error {
+			// Custom certificate validation logic can be added here.
+			// For example, validate the certificate against a known CA or specific criteria.
+			return nil
+		},
+	}
 	proxyTransport := utilnet.SetTransportDefaults(&http.Transport{
 		DialContext:     proxyDialerFn,
 		TLSClientConfig: proxyTLSClientConfig,

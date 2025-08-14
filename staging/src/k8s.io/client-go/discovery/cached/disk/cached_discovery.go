@@ -68,6 +68,10 @@ var _ discovery.CachedDiscoveryInterface = &CachedDiscoveryClient{}
 
 // ServerResourcesForGroupVersion returns the supported resources for a group and version.
 func (d *CachedDiscoveryClient) ServerResourcesForGroupVersion(groupVersion string) (*metav1.APIResourceList, error) {
+	// Validate groupVersion to ensure it does not contain invalid characters
+	if strings.Contains(groupVersion, "/") || strings.Contains(groupVersion, "\\") || strings.Contains(groupVersion, "..") {
+		return nil, fmt.Errorf("invalid groupVersion: %s", groupVersion)
+	}
 	filename := filepath.Join(d.cacheDirectory, groupVersion, "serverresources.json")
 	cachedBytes, err := d.getCachedFile(filename)
 	// don't fail on errors, we either don't have a file or won't be able to run the cached check. Either way we can fallback.

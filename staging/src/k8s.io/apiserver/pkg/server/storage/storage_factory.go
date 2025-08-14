@@ -318,8 +318,10 @@ func backends(storageConfig storagebackend.Config, grOverrides map[schema.GroupR
 		servers.Insert(overrides.etcdLocation...)
 	}
 
-	tlsConfig := &tls.Config{
-		InsecureSkipVerify: true,
+	tlsConfig := &tls.Config{}
+	if len(storageConfig.Transport.TrustedCAFile) == 0 {
+		klog.Errorf("no trusted CA file provided; cannot create secure backends")
+		return nil
 	}
 	if len(storageConfig.Transport.CertFile) > 0 && len(storageConfig.Transport.KeyFile) > 0 {
 		cert, err := tls.LoadX509KeyPair(storageConfig.Transport.CertFile, storageConfig.Transport.KeyFile)

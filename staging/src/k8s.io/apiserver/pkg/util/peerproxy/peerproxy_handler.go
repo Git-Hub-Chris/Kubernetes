@@ -20,7 +20,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math/rand"
+	"crypto/rand"
+	"math/big"
 	"net"
 	"net/http"
 	"net/url"
@@ -174,8 +175,13 @@ func (h *peerProxyHandler) WrapHandler(handler http.Handler) http.Handler {
 		}
 
 		// otherwise, randomly select an apiserver and proxy request to it
-		rand := rand.Intn(len(peerEndpoints))
-		destServerHostPort := peerEndpoints[rand]
+		idx, err := rand.Int(rand.Reader, big.NewInt(int64(len(peerEndpoints))))
+		if err != nil {
+			klog.Errorf("Failed to generate secure random index: %v", err)
+			handler.ServeHTTP(w, r)
+			return
+		}
+		destServerHostPort := peerEndpoints[idx.Int64()]
 		h.proxyRequestToDestinationAPIServer(r, w, destServerHostPort)
 	})
 }
