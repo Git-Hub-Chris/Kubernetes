@@ -24,6 +24,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -61,7 +62,16 @@ func main(cmd *cobra.Command, args []string) {
 			http.Error(w, fmt.Sprintf("invalid redirect: %q", r.URL.Query().Get("loc")), http.StatusBadRequest)
 			return
 		}
-		http.Redirect(w, r, loc, http.StatusFound)
+		// Replace backslashes with forward slashes
+		loc = strings.ReplaceAll(loc, "\\", "/")
+		// Parse the URL
+		target, err := url.Parse(loc)
+		if err != nil || target.Hostname() != "" {
+			http.Error(w, "invalid redirect target", http.StatusBadRequest)
+			return
+		}
+		// Perform the redirect
+		http.Redirect(w, r, target.String(), http.StatusFound)
 	})
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
