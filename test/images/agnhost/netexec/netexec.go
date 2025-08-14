@@ -24,6 +24,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"html"
 	"net/url"
 	"os"
 	"os/exec"
@@ -280,7 +281,7 @@ func echoHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		w.WriteHeader(code)
 	}
-	fmt.Fprintf(w, "%s", msg)
+	fmt.Fprintf(w, "%s", html.EscapeString(msg))
 }
 
 func clientIPHandler(w http.ResponseWriter, r *http.Request) {

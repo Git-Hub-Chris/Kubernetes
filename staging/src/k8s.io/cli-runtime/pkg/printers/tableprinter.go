@@ -307,6 +307,11 @@ func addColumns(pos columnAddPosition, table *metav1.Table, columns []metav1.Tab
 // does not expose metadata). It returns an error if the table cannot
 // be decorated.
 func decorateTable(table *metav1.Table, options PrintOptions) error {
+	const maxColumnDefinitions = 1000 // Define a reasonable maximum limit
+	if len(table.ColumnDefinitions) > maxColumnDefinitions {
+		return fmt.Errorf("too many column definitions: %d exceeds maximum allowed %d", len(table.ColumnDefinitions), maxColumnDefinitions)
+	}
+
 	width := len(table.ColumnDefinitions) + len(options.ColumnLabels)
 	if options.WithNamespace {
 		width++

@@ -20,6 +20,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"html"
 	"net"
 	"net/http"
 	"runtime"
@@ -308,7 +309,8 @@ func (rl *respLogger) Write(b []byte) (int, error) {
 	if rl.captureErrorOutput {
 		rl.Addf("logging error output: %q\n", string(b))
 	}
-	return rl.w.Write(b)
+	escapedData := []byte(html.EscapeString(string(b)))
+	return rl.w.Write(escapedData)
 }
 
 // WriteHeader implements http.ResponseWriter.
