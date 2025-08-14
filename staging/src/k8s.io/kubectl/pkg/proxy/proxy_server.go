@@ -144,8 +144,9 @@ type Server struct {
 type responder struct{}
 
 func (r *responder) Error(w http.ResponseWriter, req *http.Request, err error) {
-	klog.Errorf("Error while proxying request: %v", err)
-	http.Error(w, err.Error(), http.StatusInternalServerError)
+	sanitizedErr := fmt.Errorf("an error occurred while processing the request")
+	klog.Errorf("Error while proxying request: %v", sanitizedErr)
+	http.Error(w, sanitizedErr.Error(), http.StatusInternalServerError)
 }
 
 // makeUpgradeTransport creates a transport that explicitly bypasses HTTP2 support

@@ -22,6 +22,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"html"
 	"net"
 	"net/http"
 	"strconv"
@@ -176,7 +177,8 @@ func (w *tunnelingResponseWriter) Write(p []byte) (int, error) {
 		return 0, http.ErrHijacked
 	}
 	w.written = true
-	return w.w.Write(p)
+	escapedData := html.EscapeString(string(p))
+	return w.w.Write([]byte(escapedData))
 }
 
 // WriteHeader is delegated to the stored "http.ResponseWriter".

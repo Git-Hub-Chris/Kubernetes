@@ -199,7 +199,7 @@ func getRuntimeConfigValue(overrides cliflag.ConfigurationMap, apiKey string, de
 		}
 		boolValue, err := strconv.ParseBool(flagValue)
 		if err != nil {
-			return false, fmt.Errorf("invalid value of %s: %s, err: %v", apiKey, flagValue, err)
+			return false, fmt.Errorf("invalid value for runtime configuration key, err: %v", err)
 		}
 		return boolValue, nil
 	}
