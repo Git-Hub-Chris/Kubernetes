@@ -64,6 +64,15 @@ import (
 	"k8s.io/klog/v2"
 )
 
+// sanitizeWebhooks removes or obfuscates sensitive information from the webhooks map before logging.
+func sanitizeWebhooks(webhooks map[string]WebhookHandler) map[string]string {
+	sanitized := make(map[string]string)
+	for key := range webhooks {
+		sanitized[key] = "handler_registered" // Replace actual handler details with a placeholder.
+	}
+	return sanitized
+}
+
 func init() {
 	utilruntime.Must(features.AddFeatureGates(utilfeature.DefaultMutableFeatureGate))
 	utilruntime.Must(logsapi.AddFeatureGates(utilfeature.DefaultMutableFeatureGate))
@@ -181,7 +190,7 @@ func Run(c *cloudcontrollerconfig.CompletedConfig, cloud cloudprovider.Interface
 
 	if utilfeature.DefaultFeatureGate.Enabled(cmfeatures.CloudControllerManagerWebhook) {
 		if len(webhooks) > 0 {
-			klog.Info("Webhook Handlers enabled: ", webhooks)
+			klog.Info("Webhook Handlers enabled: ", sanitizeWebhooks(webhooks))
 			handler := newHandler(webhooks)
 			if _, _, err := c.WebhookSecureServing.Serve(handler, 0, stopCh); err != nil {
 				return err
