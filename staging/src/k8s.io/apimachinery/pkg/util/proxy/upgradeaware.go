@@ -449,7 +449,19 @@ func (h *UpgradeAwareHandler) tryUpgrade(w http.ResponseWriter, req *http.Reques
 	case <-writerComplete:
 	case <-readerComplete:
 	}
-	klog.V(6).Infof("Disconnecting from backend proxy %s\n  Headers: %v", &location, clone.Header)
+	// Log only safe headers to avoid exposing sensitive information
+	safeHeaders := http.Header{}
+	allowedHeaders := map[string]bool{
+		"Content-Type": true,
+		"User-Agent":   true,
+		"Accept":       true,
+	}
+	for key, values := range clone.Header {
+		if allowedHeaders[key] {
+			safeHeaders[key] = values
+		}
+	}
+	klog.V(6).Infof("Disconnecting from backend proxy %s\n  Headers: %v", &location, safeHeaders)
 
 	return true
 }

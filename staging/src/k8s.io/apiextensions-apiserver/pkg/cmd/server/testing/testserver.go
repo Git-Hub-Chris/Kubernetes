@@ -19,6 +19,7 @@ package testing
 import (
 	"context"
 	"errors"
+	"errors"
 	"fmt"
 	"net"
 	"os"
@@ -239,6 +240,7 @@ func StartTestServer(t Logger, _ *TestServerInstanceOptions, customFlags []strin
 	return result, nil
 }
 
+
 // StartTestServerOrDie calls StartTestServer t.Fatal if it does not succeed.
 func StartTestServerOrDie(t Logger, instanceOptions *TestServerInstanceOptions, flags []string, storageConfig *storagebackend.Config) *TestServer {
 	result, err := StartTestServer(t, instanceOptions, flags, storageConfig)
@@ -246,7 +248,7 @@ func StartTestServerOrDie(t Logger, instanceOptions *TestServerInstanceOptions, 
 		return &result
 	}
 
-	t.Fatalf("failed to launch server: %v", err)
+	t.Fatalf("failed to launch server: %v", sanitizeError(err))
 	return nil
 }
 
