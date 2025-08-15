@@ -337,7 +337,7 @@ func (o *AuditOptions) ApplyTo(
 	c.AuditBackend = appendBackend(logBackend, dynamicBackend)
 
 	if c.AuditBackend != nil {
-		klog.V(2).Infof("Using audit backend: %s", c.AuditBackend)
+		klog.V(2).Infof("Using audit backend: %T", c.AuditBackend)
 	}
 	return nil
 }
