@@ -379,6 +379,9 @@ func (conn *Conn) write(num byte, data []byte) (int, error) {
 	conn.resetTimeout()
 	switch conn.codec {
 	case rawCodec:
+		if len(data) > 64*1024*1024 { // Limit to 64 MB
+			return 0, fmt.Errorf("data size exceeds maximum allowed limit")
+		}
 		frame := make([]byte, len(data)+1)
 		frame[0] = num
 		copy(frame[1:], data)
