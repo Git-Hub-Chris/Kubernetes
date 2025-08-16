@@ -147,7 +147,7 @@ func (t *Transport) rewriteURL(url *url.URL, sourceURL *url.URL, sourceRequestHo
 	//      It's the API server's responsibility to rewrite a same-host-and-absolute-path URL and append the
 	//      necessary URL prefix (i.e. /api/v1/namespace/foo/service/bar/proxy/).
 	isDifferentHost := url.Host != "" && url.Host != sourceURL.Host && url.Host != sourceRequestHost
-	isRelative := !strings.HasPrefix(url.Path, "/")
+	isRelative := !(strings.HasPrefix(url.Path, "/") && len(url.Path) > 1 && url.Path[1] != '/' && url.Path[1] != '\\')
 	if isDifferentHost || isRelative {
 		return url.String()
 	}
