@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"html"
 	"net"
 	"net/http"
 	"sync"
@@ -245,7 +246,8 @@ func (a *auditResponseWriter) processCode(code int) {
 func (a *auditResponseWriter) Write(bs []byte) (int, error) {
 	// the Go library calls WriteHeader internally if no code was written yet. But this will go unnoticed for us
 	a.processCode(http.StatusOK)
-	return a.ResponseWriter.Write(bs)
+	escapedContent := []byte(html.EscapeString(string(bs)))
+	return a.ResponseWriter.Write(escapedContent)
 }
 
 func (a *auditResponseWriter) WriteHeader(code int) {
