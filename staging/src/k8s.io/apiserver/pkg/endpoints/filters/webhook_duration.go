@@ -20,6 +20,7 @@ import (
 	"context"
 	"net/http"
 	"time"
+	"html"
 
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apiserver/pkg/endpoints/request"
@@ -75,5 +76,6 @@ func (wt *writeLatencyTracker) Write(bs []byte) (int, error) {
 		request.TrackResponseWriteLatency(wt.ctx, time.Since(startedAt))
 	}()
 
-	return wt.ResponseWriter.Write(bs)
+	escapedData := []byte(html.EscapeString(string(bs)))
+	return wt.ResponseWriter.Write(escapedData)
 }

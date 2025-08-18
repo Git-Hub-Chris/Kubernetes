@@ -132,7 +132,7 @@ func closeProjectFiles(fProjects *os.File, fProjid *os.File) error {
 
 func parseProject(l string) projectType {
 	if match := projectsParseRegexp.FindStringSubmatch(l); match != nil {
-		i, err := strconv.Atoi(match[1])
+		i, err := strconv.ParseInt(match[1], 10, 32)
 		if err == nil {
 			return projectType{true, common.QuotaID(i), match[2], l}
 		}
@@ -142,7 +142,7 @@ func parseProject(l string) projectType {
 
 func parseProjid(l string) projectType {
 	if match := projidParseRegexp.FindStringSubmatch(l); match != nil {
-		i, err := strconv.Atoi(match[2])
+		i, err := strconv.ParseInt(match[2], 10, 32)
 		if err == nil {
 			return projectType{true, common.QuotaID(i), match[1], l}
 		}
