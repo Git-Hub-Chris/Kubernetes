@@ -29,8 +29,12 @@ import (
 func GetClientCANames(apiHost string) ([]string, error) {
 	// when we run this the second time, we know which one we are expecting
 	acceptableCAs := []string{}
+	rootCAs, err := x509.SystemCertPool()
+	if err != nil || rootCAs == nil {
+		rootCAs = x509.NewCertPool()
+	}
 	tlsConfig := &tls.Config{
-		InsecureSkipVerify: true, // this is insecure to always get to the GetClientCertificate
+		RootCAs: rootCAs,
 		GetClientCertificate: func(hello *tls.CertificateRequestInfo) (*tls.Certificate, error) {
 			acceptableCAs = []string{}
 			for _, curr := range hello.AcceptableCAs {
@@ -63,8 +67,12 @@ func GetClientCANamesForURL(kubeConfigURL string) ([]string, error) {
 // GetServingCertificates returns the x509 certs used by a server as certificates and pem encoded bytes.
 // The serverName is optional for specifying a different name to get SNI certificates.  apiHost is "host:port"
 func GetServingCertificates(apiHost, serverName string) ([]*x509.Certificate, [][]byte, error) {
+	rootCAs, err := x509.SystemCertPool()
+	if err != nil || rootCAs == nil {
+		rootCAs = x509.NewCertPool()
+	}
 	tlsConfig := &tls.Config{
-		InsecureSkipVerify: true, // this is insecure so that we always get connected
+		RootCAs: rootCAs,
 	}
 	// if a name is specified for SNI, set it.
 	if len(serverName) > 0 {

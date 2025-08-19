@@ -19,6 +19,7 @@ package apiclient
 import (
 	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"io"
 	"net"
@@ -263,8 +264,13 @@ func (w *KubeWaiter) WaitForControlPlaneComponents(podMap map[string]*v1.Pod, ap
 		fmt.Printf("[control-plane-check] Checking %s at %s\n", comp.name, comp.url)
 
 		go func(comp controlPlaneComponent) {
+			// Create a secure TLS configuration with a trusted certificate pool
+			rootCAs, err := x509.SystemCertPool()
+			if err != nil || rootCAs == nil {
+				rootCAs = x509.NewCertPool()
+			}
 			tr := &http.Transport{
-				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+				TLSClientConfig: &tls.Config{RootCAs: rootCAs},
 			}
 			client := &http.Client{Transport: tr}
 			start := time.Now()

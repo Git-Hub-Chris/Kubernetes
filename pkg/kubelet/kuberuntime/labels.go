@@ -232,12 +232,16 @@ func getStringValueFromLabel(labels map[string]string, label string) string {
 
 func getIntValueFromLabel(labels map[string]string, label string) (int, error) {
 	if strValue, found := labels[label]; found {
-		intValue, err := strconv.Atoi(strValue)
+		parsedValue, err := strconv.ParseInt(strValue, 10, 32)
 		if err != nil {
 			// This really should not happen. Just set value to 0 to handle this abnormal case
 			return 0, err
 		}
-		return intValue, nil
+		// Ensure the value is within the range of int32
+		if parsedValue < math.MinInt32 || parsedValue > math.MaxInt32 {
+			return 0, fmt.Errorf("value out of range for int32: %d", parsedValue)
+		}
+		return int(parsedValue), nil
 	}
 	// Do not report error, because there should be many old containers without label now.
 	klog.V(3).InfoS("Container doesn't have requested label, it may be an old or invalid container", "label", label)

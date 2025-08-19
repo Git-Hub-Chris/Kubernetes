@@ -42,7 +42,7 @@ func WithImpersonation(handler http.Handler, a authorizer.Authorizer, s runtime.
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		impersonationRequests, err := buildImpersonationRequests(req.Header)
 		if err != nil {
-			klog.V(4).Infof("%v", err)
+			klog.V(4).Info("Error processing impersonation requests")
 			responsewriters.InternalError(w, req, err)
 			return
 		}
