@@ -178,6 +178,10 @@ func (t *transformerWithInfo) TransformToStorage(ctx context.Context, data []byt
 		return nil, err
 	}
 
+	// Validate that the combined size does not exceed the maximum value of an int
+	if len(out) > (int(^uint(0) >> 1) - len(t.info)) {
+		return nil, fmt.Errorf("data size too large to process")
+	}
 	outWithInfo := make([]byte, 0, len(out)+len(t.info))
 	outWithInfo = append(outWithInfo, t.info...)
 	outWithInfo = append(outWithInfo, out...)
