@@ -99,6 +99,11 @@ func (a APIObjectVersioner) ParseResourceVersion(resourceVersion string) (uint64
 			field.Invalid(field.NewPath("resourceVersion"), resourceVersion, err.Error()),
 		})
 	}
+	if version > math.MaxInt64 {
+		return 0, NewInvalidError(field.ErrorList{
+			field.Invalid(field.NewPath("resourceVersion"), resourceVersion, "value exceeds int64 range"),
+		})
+	}
 	return version, nil
 }
 

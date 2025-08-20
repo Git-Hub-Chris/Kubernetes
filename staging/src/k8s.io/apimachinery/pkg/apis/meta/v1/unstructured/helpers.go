@@ -410,6 +410,9 @@ func (unstructuredJSONScheme) doEncode(obj runtime.Object, w io.Writer) error {
 		for _, i := range t.Items {
 			items = append(items, i.Object)
 		}
+		if len(t.Object) > math.MaxInt-1 {
+			return fmt.Errorf("object size too large: %d", len(t.Object))
+		}
 		listObj := make(map[string]interface{}, len(t.Object)+1)
 		for k, v := range t.Object { // Make a shallow copy
 			listObj[k] = v
