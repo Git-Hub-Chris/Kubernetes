@@ -20,7 +20,8 @@ import (
 	"context"
 	"sort"
 	"strconv"
-
+	"fmt"
+	"math"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
@@ -253,5 +254,11 @@ func ResolveFenceposts(maxSurge, maxUnavailable *intstrutil.IntOrString, desired
 		unavailable = 1
 	}
 
+	if surge > math.MaxInt32 || surge < math.MinInt32 {
+		return 0, 0, fmt.Errorf("surge value %d is out of range for int32", surge)
+	}
+	if unavailable > math.MaxInt32 || unavailable < math.MinInt32 {
+		return 0, 0, fmt.Errorf("unavailable value %d is out of range for int32", unavailable)
+	}
 	return int32(surge), int32(unavailable), nil
 }

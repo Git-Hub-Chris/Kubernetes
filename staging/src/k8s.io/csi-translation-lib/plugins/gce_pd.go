@@ -285,11 +285,11 @@ func (g *gcePersistentDiskCSITranslator) TranslateCSIPVToInTree(pv *v1.Persisten
 		ReadOnly: csiSource.ReadOnly,
 	}
 	if partition, ok := csiSource.VolumeAttributes["partition"]; ok && partition != "" {
-		partInt, err := strconv.Atoi(partition)
+		partInt64, err := strconv.ParseInt(partition, 10, 32)
 		if err != nil {
-			return nil, fmt.Errorf("Failed to convert partition %v to integer: %v", partition, err)
+			return nil, fmt.Errorf("Failed to convert partition %v to 32-bit integer: %v", partition, err)
 		}
-		gceSource.Partition = int32(partInt)
+		gceSource.Partition = int32(partInt64)
 	}
 
 	// translate CSI topology to In-tree topology for rollback compatibility
