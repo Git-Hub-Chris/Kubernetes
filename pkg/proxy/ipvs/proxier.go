@@ -1884,6 +1884,11 @@ func (proxier *Proxier) syncEndpoint(svcPortName proxy.ServicePortName, onlyNode
 			proxier.logger.Error(err, "Failed to parse endpoint port", "port", port)
 			continue
 		}
+		// Ensure portNum is within the valid range for uint16
+		if portNum < 0 || portNum > 65535 {
+			proxier.logger.Error(fmt.Errorf("port out of range"), "Port number out of range for uint16", "port", portNum)
+			continue
+		}
 
 		newDest := &utilipvs.RealServer{
 			Address: netutils.ParseIPSloppy(ip),
@@ -1939,6 +1944,11 @@ func (proxier *Proxier) syncEndpoint(svcPortName proxy.ServicePortName, onlyNode
 		portNum, err := strconv.Atoi(port)
 		if err != nil {
 			proxier.logger.Error(err, "Failed to parse endpoint port", "port", port)
+			continue
+		}
+		// Check if portNum is within the valid range for uint16
+		if portNum < 0 || portNum > 65535 {
+			proxier.logger.Error(fmt.Errorf("port out of range"), "Endpoint port is out of range for uint16", "port", portNum)
 			continue
 		}
 
