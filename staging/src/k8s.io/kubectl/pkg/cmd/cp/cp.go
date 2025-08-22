@@ -436,7 +436,14 @@ func recursiveTar(srcDir, srcFile localPath, destDir, destFile remotePath, tw *t
 		return err
 	}
 	for _, fpath := range matchedPaths {
-		stat, err := os.Lstat(fpath)
+		absFpath, err := filepath.Abs(fpath)
+		if err != nil {
+			return err
+		}
+		if !strings.HasPrefix(absFpath, srcDir.String()) {
+			return fmt.Errorf("invalid file path: %s", fpath)
+		}
+		stat, err := os.Lstat(absFpath)
 		if err != nil {
 			return err
 		}
@@ -518,8 +525,9 @@ func (o *CopyOptions) untarAll(ns, pod string, prefix string, src remotePath, de
 		// if the prefix is missing it means the tar was tempered with.
 		// For the case where prefix is empty we need to ensure that the path
 		// is not absolute, which also indicates the tar file was tempered with.
-		if !strings.HasPrefix(header.Name, prefix) {
-			return fmt.Errorf("tar contents corrupted")
+		cleanedName := path.Clean(header.Name)
+		if strings.HasPrefix(cleanedName, "/") || strings.Contains(cleanedName, "..") {
+			return fmt.Errorf("tar contents corrupted: invalid file path %q", header.Name)
 		}
 
 		// basic file information
@@ -527,18 +535,34 @@ func (o *CopyOptions) untarAll(ns, pod string, prefix string, src remotePath, de
 		// header.Name is a name of the REMOTE file, so we need to create
 		// a remotePath so that it goes through appropriate processing related
 		// with cleaning remote paths
-		destFileName := dest.Join(newRemotePath(header.Name[len(prefix):]))
+		destFileName := dest.Join(newRemotePath(cleanedName[len(prefix):]))
 
-		if !isRelative(dest, destFileName) {
+		// Validate that destFileName is within the intended destination directory
+		absDest, err := filepath.Abs(dest.String())
+		if err != nil {
+			return fmt.Errorf("failed to resolve destination path: %v", err)
+		}
+		absDestFileName, err := filepath.Abs(destFileName.String())
+		if err != nil || !strings.HasPrefix(absDestFileName, absDest) {
 			fmt.Fprintf(o.IOStreams.ErrOut, "warning: file %q is outside target destination, skipping\n", destFileName)
 			continue
 		}
 
-		if err := os.MkdirAll(destFileName.Dir().String(), 0755); err != nil {
+		// Validate and sanitize the directory path before creating it
+		sanitizedDirPath := filepath.Clean(destFileName.Dir().String())
+		if !strings.HasPrefix(sanitizedDirPath, absDest) {
+			return fmt.Errorf("invalid directory path: %q is outside the target destination", sanitizedDirPath)
+		}
+		if err := os.MkdirAll(sanitizedDirPath, 0755); err != nil {
 			return err
 		}
 		if header.FileInfo().IsDir() {
-			if err := os.MkdirAll(destFileName.String(), 0755); err != nil {
+			// Validate and sanitize destFileName before using it
+			sanitizedDestFileName := filepath.Clean(destFileName.String())
+			if !strings.HasPrefix(sanitizedDestFileName, absDest) {
+				return fmt.Errorf("invalid file path: %q is outside the target destination", sanitizedDestFileName)
+			}
+			if err := os.MkdirAll(sanitizedDestFileName, 0755); err != nil {
 				return err
 			}
 			continue
@@ -555,7 +579,12 @@ func (o *CopyOptions) untarAll(ns, pod string, prefix string, src remotePath, de
 			fmt.Fprintf(o.IOStreams.ErrOut, "warning: skipping symlink: %q -> %q\n", destFileName, header.Linkname)
 			continue
 		}
-		outFile, err := os.Create(destFileName.String())
+		// Validate and sanitize destFileName before creating the file
+		sanitizedDestFileName := filepath.Clean(destFileName.String())
+		if !strings.HasPrefix(sanitizedDestFileName, absDest) {
+			return fmt.Errorf("invalid file path: %q is outside the target destination", sanitizedDestFileName)
+		}
+		outFile, err := os.Create(sanitizedDestFileName)
 		if err != nil {
 			return err
 		}

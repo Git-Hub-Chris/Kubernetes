@@ -61,7 +61,12 @@ func (p localPath) Clean() localPath {
 }
 
 func (p localPath) Join(elem pathSpec) localPath {
-	return newLocalPath(filepath.Join(p.file, elem.String()))
+	joinedPath := filepath.Join(p.file, elem.String())
+	cleanPath := filepath.Clean(joinedPath)
+	if strings.Contains(cleanPath, "..") {
+		return newLocalPath("") // Return an empty path to indicate invalid input
+	}
+	return newLocalPath(cleanPath)
 }
 
 func (p localPath) Glob() (matches []string, err error) {

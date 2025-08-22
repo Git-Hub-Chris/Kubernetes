@@ -19,6 +19,7 @@ package rest
 import (
 	"bytes"
 	"context"
+	"math"
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
@@ -1538,11 +1539,13 @@ func isTextResponse(resp *http.Response) bool {
 }
 
 // retryAfterSeconds returns the value of the Retry-After header and true, or 0 and false if
-// the header was missing or not a valid number.
+// the header was missing, not a valid number, or out of the int32 range.
 func retryAfterSeconds(resp *http.Response) (int, bool) {
 	if h := resp.Header.Get("Retry-After"); len(h) > 0 {
 		if i, err := strconv.Atoi(h); err == nil {
-			return i, true
+			if i >= 0 && i <= math.MaxInt32 {
+				return i, true
+			}
 		}
 	}
 	return 0, false
