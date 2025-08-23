@@ -542,7 +542,11 @@ func EtcdSupportedVersion(supportedEtcdVersion map[uint8]string, versionString s
 	if err != nil {
 		return nil, nil, err
 	}
-	desiredVersion, etcdStringVersion := uint8(kubernetesVersion.Minor()), ""
+	var desiredVersion uint8
+	if kubernetesVersion.Minor() > math.MaxUint8 {
+		return nil, nil, fmt.Errorf("minor version %d exceeds maximum value for uint8", kubernetesVersion.Minor())
+	}
+	desiredVersion, etcdStringVersion = uint8(kubernetesVersion.Minor()), ""
 
 	min, max := ^uint8(0), uint8(0)
 	for k, v := range supportedEtcdVersion {
