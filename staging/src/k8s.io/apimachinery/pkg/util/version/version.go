@@ -23,6 +23,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"math"
 
 	apimachineryversion "k8s.io/apimachinery/pkg/version"
 )
@@ -480,5 +481,6 @@ func itoa(i uint) string {
 	if i == 0 {
 		return ""
 	}
-	return strconv.Itoa(int(i))
+	// Directly convert the uint value to a string
+	return strconv.FormatUint(uint64(i), 10)
 }
