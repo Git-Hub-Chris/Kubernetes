@@ -24,6 +24,7 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
+	"math"
 	"strings"
 	"time"
 
@@ -198,6 +199,9 @@ func translateServicePortToTargetPort(ports []string, svc corev1.Service, pod co
 			if localPort == remotePort {
 				localPort = strconv.Itoa(portnum)
 			}
+		}
+		if portnum < math.MinInt32 || portnum > math.MaxInt32 {
+			return nil, fmt.Errorf("port number %d is out of range for int32", portnum)
 		}
 		containerPort, err := util.LookupContainerPortNumberByServicePort(svc, pod, int32(portnum))
 		if err != nil {

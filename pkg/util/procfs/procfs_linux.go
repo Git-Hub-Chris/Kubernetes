@@ -153,6 +153,11 @@ func getPids(re *regexp.Regexp) []int {
 			// Check if the name of the executable is what we are looking for
 			if re.MatchString(exe[0]) {
 				// Grab the PID from the directory path
+				// Ensure the PID is within the valid range for int
+				if pid < 0 || pid > math.MaxInt32 {
+					klog.Warningf("Skipping PID %d as it is out of range", pid)
+					continue
+				}
 				pids = append(pids, pid)
 			}
 		}
