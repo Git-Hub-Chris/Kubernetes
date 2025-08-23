@@ -90,6 +90,11 @@ func getEndpointPorts(logger klog.Logger, service *v1.Service, pod *v1.Pod) []di
 			continue
 		}
 
+		if portNum < math.MinInt32 || portNum > math.MaxInt32 {
+			logger.V(4).Info("Port number out of range for int32", "portNum", portNum)
+			continue
+		}
+
 		endpointPorts = append(endpointPorts, discovery.EndpointPort{
 			Name:        ptr.To(servicePort.Name),
 			Port:        ptr.To(int32(portNum)),

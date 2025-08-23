@@ -259,10 +259,11 @@ func (plugin *iscsiPlugin) ConstructVolumeSpec(volumeName, mountPath string) (vo
 	if len(arr) < 2 {
 		return volume.ReconstructedVolume{}, fmt.Errorf("failed to retrieve lun from globalPDPath: %v", globalPDPath)
 	}
-	lun, err := strconv.Atoi(arr[1])
+	lun64, err := strconv.ParseInt(arr[1], 10, 32)
 	if err != nil {
 		return volume.ReconstructedVolume{}, err
 	}
+	lun := int32(lun64)
 	iface, _ := extractIface(globalPDPath)
 	iscsiVolume := &v1.Volume{
 		Name: volumeName,

@@ -817,6 +817,14 @@ func (dc *DisruptionController) getExpectedPodCount(ctx context.Context, pdb *po
 		if err != nil {
 			return
 		}
+		// Ensure maxUnavailable is within the bounds of int32
+		if maxUnavailable > math.MaxInt32 {
+			err = fmt.Errorf("maxUnavailable value %d exceeds int32 maximum", maxUnavailable)
+			return
+		} else if maxUnavailable < math.MinInt32 {
+			err = fmt.Errorf("maxUnavailable value %d is below int32 minimum", maxUnavailable)
+			return
+		}
 		desiredHealthy = expectedCount - int32(maxUnavailable)
 		if desiredHealthy < 0 {
 			desiredHealthy = 0
