@@ -18,7 +18,7 @@ package util
 
 import (
 	"fmt"
-
+	"math"
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
@@ -40,7 +40,11 @@ func LookupContainerPortNumberByServicePort(svc v1.Service, pod v1.Pod, port int
 				// targetPort is omitted, and the IntValue() would be zero
 				return svcportspec.Port, nil
 			}
-			return int32(svcportspec.TargetPort.IntValue()), nil
+			intValue := svcportspec.TargetPort.IntValue()
+			if intValue < math.MinInt32 || intValue > math.MaxInt32 {
+				return port, fmt.Errorf("TargetPort value %d is out of bounds for int32", intValue)
+			}
+			return int32(intValue), nil
 		}
 		return LookupContainerPortNumberByName(pod, svcportspec.TargetPort.String())
 	}
