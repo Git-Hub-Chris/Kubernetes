@@ -73,11 +73,8 @@ func PreferredTLSCipherNames() []string {
 }
 
 func allCiphers() map[string]uint16 {
-	acceptedCiphers := make(map[string]uint16, len(ciphers)+len(insecureCiphers))
+	acceptedCiphers := make(map[string]uint16, len(ciphers))
 	for k, v := range ciphers {
-		acceptedCiphers[k] = v
-	}
-	for k, v := range insecureCiphers {
 		acceptedCiphers[k] = v
 	}
 	return acceptedCiphers

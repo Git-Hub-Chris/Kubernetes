@@ -2062,7 +2062,7 @@ func (kl *Kubelet) convertToAPIContainerStatuses(pod *v1.Pod, podStatus *kubecon
 		cid := cs.ID.String()
 		status := &v1.ContainerStatus{
 			Name:         cs.Name,
-			RestartCount: int32(cs.RestartCount),
+			RestartCount: int32(cs.RestartCount), // Safe because bounds are checked during parsing.
 			Image:        cs.Image,
 			// Converting the digested image ref to the Kubernetes public
 			// ContainerStatus.ImageID is historically intentional and should

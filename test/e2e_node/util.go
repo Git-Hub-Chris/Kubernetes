@@ -367,6 +367,11 @@ func findContainerRuntimeServiceName() (string, error) {
 
 	containerRuntimePid := runtimePids[0]
 
+	// Ensure the PID is within the valid range for uint32
+	if containerRuntimePid < 0 || containerRuntimePid > math.MaxUint32 {
+		framework.Failf("PID %d is out of range for uint32", containerRuntimePid)
+	}
+
 	unitName, err := conn.GetUnitNameByPID(ctx, uint32(containerRuntimePid))
 	framework.ExpectNoError(err, "Failed to get container runtime unit name")
 
