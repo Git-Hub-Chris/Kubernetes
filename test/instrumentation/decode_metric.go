@@ -23,6 +23,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"math"
 	"time"
 
 	"k8s.io/component-base/metrics"
@@ -759,6 +760,10 @@ func decodeBucketArguments(fc *ast.CallExpr) (float64, float64, int, error) {
 	thirdArg, err := strconv.ParseInt(strArgs[2], 10, 64)
 	if err != nil {
 		return 0, 0, 0, newDecodeErrorf(fc.Args[2], errBuckets)
+	}
+	// Check if thirdArg is within the range of the int type
+	if thirdArg < math.MinInt || thirdArg > math.MaxInt {
+		return 0, 0, 0, newDecodeErrorf(fc.Args[2], "value out of range for int type")
 	}
 
 	return firstArg, secondArg, int(thirdArg), nil

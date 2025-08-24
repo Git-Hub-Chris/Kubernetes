@@ -20,6 +20,8 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"path/filepath"
+	"strings"
 
 	"github.com/emicklei/go-restful/v3"
 )
@@ -43,13 +45,18 @@ func (l Logs) Install(c *restful.Container) {
 func logFileHandler(req *restful.Request, resp *restful.Response) {
 	logdir := "/var/log"
 	actual := path.Join(logdir, req.PathParameter("logpath"))
+	absPath, err := filepath.Abs(actual)
+	if err != nil || !strings.HasPrefix(absPath, logdir) {
+		http.Error(resp, "Invalid file path", http.StatusBadRequest)
+		return
+	}
 
 	// check filename length first, return 404 if it's oversize.
-	if logFileNameIsTooLong(actual) {
+	if logFileNameIsTooLong(absPath) {
 		http.Error(resp, "file not found", http.StatusNotFound)
 		return
 	}
-	http.ServeFile(resp.ResponseWriter, req.Request, actual)
+	http.ServeFile(resp.ResponseWriter, req.Request, absPath)
 }
 
 func logFileListHandler(req *restful.Request, resp *restful.Response) {

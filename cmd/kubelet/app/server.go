@@ -1163,23 +1163,11 @@ func InitializeTLS(kf *options.KubeletFlags, kc *kubeletconfiginternal.KubeletCo
 		return nil, err
 	}
 
-	// Filter out insecure cipher suites
-	insecureCiphers := cliflag.InsecureTLSCiphers()
-	filteredCipherSuites := make([]uint16, 0, len(tlsCipherSuites))
-	for _, cipher := range tlsCipherSuites {
-		isInsecure := false
-		for _, insecureCipher := range insecureCiphers {
-			if cipher == insecureCipher {
-				isInsecure = true
-				klog.InfoS("Excluding insecure cipher suite.", "cipher", cipher)
-				break
-			}
-		}
-		if !isInsecure {
-			filteredCipherSuites = append(filteredCipherSuites, cipher)
-		}
+	// Use only secure cipher suites
+	tlsCipherSuites, err := cliflag.TLSCipherSuites(kc.TLSCipherSuites)
+	if err != nil {
+		return nil, err
 	}
-	tlsCipherSuites = filteredCipherSuites
 
 	// Enforce minimum TLS version of 1.2
 	minTLSVersion, err := cliflag.TLSVersion(kc.TLSMinVersion)

@@ -67,8 +67,12 @@ func DialURL(ctx context.Context, url *url.URL, transport http.RoundTripper) (ne
 				// tls.Client requires non-nil config
 				klog.Warning("using custom dialer with no TLSClientConfig. Defaulting to InsecureSkipVerify")
 				// tls.Handshake() requires ServerName or InsecureSkipVerify
+				inferredHost := dialAddr
+				if host, _, err := net.SplitHostPort(dialAddr); err == nil {
+					inferredHost = host
+				}
 				tlsConfig = &tls.Config{
-					InsecureSkipVerify: true,
+					ServerName: inferredHost,
 				}
 			} else if len(tlsConfig.ServerName) == 0 && !tlsConfig.InsecureSkipVerify {
 				// tls.HandshakeContext() requires ServerName or InsecureSkipVerify

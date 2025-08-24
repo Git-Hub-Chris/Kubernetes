@@ -23,6 +23,7 @@ import (
 	"math/rand"
 	"strings"
 	"time"
+	"math"
 
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -1247,6 +1248,11 @@ func testProportionalScalingDeployment(ctx context.Context, f *framework.Framewo
 	// Checking state of first rollout's replicaset.
 	maxUnavailable, err := intstr.GetScaledValueFromIntOrPercent(deployment.Spec.Strategy.RollingUpdate.MaxUnavailable, int(*(deployment.Spec.Replicas)), false)
 	framework.ExpectNoError(err)
+
+	// Ensure maxUnavailable is within the range of int32.
+	if maxUnavailable > math.MaxInt32 || maxUnavailable < math.MinInt32 {
+		framework.Failf("maxUnavailable value %d is out of range for int32", maxUnavailable)
+	}
 
 	// First rollout's replicaset should have Deployment's (replicas - maxUnavailable) = 10 - 2 = 8 available replicas.
 	minAvailableReplicas := replicas - int32(maxUnavailable)

@@ -124,7 +124,13 @@ func (intstr *IntOrString) String() string {
 func (intstr *IntOrString) IntValue() int {
 	if intstr.Type == String {
 		i, _ := strconv.Atoi(intstr.StrVal)
+		if i < math.MinInt32 || i > math.MaxInt32 {
+			return 0 // Return a default value or handle the error as needed
+		}
 		return i
+	}
+	if intstr.IntVal < math.MinInt32 || intstr.IntVal > math.MaxInt32 {
+		return 0 // Return a default value or handle the error as needed
 	}
 	return int(intstr.IntVal)
 }

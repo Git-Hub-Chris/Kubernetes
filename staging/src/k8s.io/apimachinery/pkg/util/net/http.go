@@ -548,6 +548,10 @@ func ParseWarningHeader(header string) (result WarningHeader, remainder string, 
 		return WarningHeader{}, "", errors.New("invalid warning header: code segment is not 3 digits between 100-299")
 	}
 	codeInt, _ := strconv.ParseInt(code, 10, 64)
+	// Ensure codeInt is within the valid range for int
+	if codeInt < 100 || codeInt > 299 {
+		return WarningHeader{}, "", errors.New("invalid warning header: code segment out of range")
+	}
 
 	// verify agent presence
 	if len(agent) == 0 {
